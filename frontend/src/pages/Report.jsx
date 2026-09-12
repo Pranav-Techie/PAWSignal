@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
+// PAWSignal production backend
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://pawsignal-2.onrender.com";
+
 function Report() {
   const fileInputRef = useRef(null);
 
@@ -130,15 +134,20 @@ function Report() {
       formData.append("latitude", latitude);
       formData.append("longitude", longitude);
 
-      const response = await fetch(
-  `${API_URL}/analyze`,
-  {
-    method: "POST",
-    body: formData,
-  }
-);
+      const response = await fetch(`${API_URL}/analyze`, {
+        method: "POST",
+        body: formData,
+      });
 
-      const data = await response.json();
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          `Backend returned an invalid response (${response.status}).`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -199,6 +208,7 @@ function Report() {
         {!result ? (
           <form className="report-layout" onSubmit={handleSubmit}>
             <section className="report-main-card">
+              {/* STEP 01 — PHOTO */}
               <div className="form-section">
                 <div className="form-section-heading">
                   <div className="step-number">01</div>
@@ -284,6 +294,7 @@ function Report() {
 
               <div className="form-divider"></div>
 
+              {/* STEP 02 — LOCATION */}
               <div className="form-section">
                 <div className="form-section-heading">
                   <div className="step-number">02</div>
@@ -322,6 +333,7 @@ function Report() {
 
               <div className="form-divider"></div>
 
+              {/* STEP 03 — DESCRIPTION */}
               <div className="form-section">
                 <div className="form-section-heading">
                   <div className="step-number">03</div>
@@ -353,6 +365,7 @@ function Report() {
               </div>
             </section>
 
+            {/* RIGHT SIDE */}
             <aside className="report-side-card">
               <div className="side-icon">
                 <Upload size={20} />
@@ -423,6 +436,7 @@ function Report() {
             </aside>
           </form>
         ) : (
+          /* ANALYSIS RESULT */
           <section className="analysis-result-page">
             <div className="result-top">
               <div>
@@ -450,6 +464,7 @@ function Report() {
             </div>
 
             <div className="result-grid">
+              {/* SCORE */}
               <div className="score-card">
                 <div className="score-card-top">
                   <span>PAWSCORE</span>
@@ -457,19 +472,22 @@ function Report() {
                 </div>
 
                 <div className="score-number">
-                  {result.score.total}
+                  {result.score?.total ?? 0}
                   <span>/100</span>
                 </div>
 
                 <div
-                  className={`priority-badge priority-${result.score.priority.toLowerCase()}`}
+                  className={`priority-badge priority-${(
+                    result.score?.priority || "unknown"
+                  ).toLowerCase()}`}
                 >
-                  {result.score.priority}
+                  {result.score?.priority || "UNKNOWN"}
                 </div>
 
                 <p>{result.recommendation}</p>
               </div>
 
+              {/* AI OBSERVATIONS */}
               <div className="analysis-card">
                 <div className="analysis-card-heading">
                   <CheckCircle2 size={19} />
@@ -480,7 +498,7 @@ function Report() {
                     <span>
                       Confidence:{" "}
                       {Math.round(
-                        (result.analysis.confidence || 0) * 100
+                        (result.analysis?.confidence || 0) * 100
                       )}
                       %
                     </span>
@@ -491,14 +509,14 @@ function Report() {
                   <div>
                     <span>Species</span>
                     <strong>
-                      {result.analysis.species || "Unknown"}
+                      {result.analysis?.species || "Unknown"}
                     </strong>
                   </div>
 
                   <div>
                     <span>Visible injury</span>
                     <strong>
-                      {result.analysis.visible_injury
+                      {result.analysis?.visible_injury
                         ? "Detected"
                         : "Not detected"}
                     </strong>
@@ -507,41 +525,42 @@ function Report() {
                   <div>
                     <span>Injury severity</span>
                     <strong>
-                      {result.analysis.injury_severity}/5
+                      {result.analysis?.injury_severity ?? 0}/5
                     </strong>
                   </div>
 
                   <div>
                     <span>Mobility impairment</span>
                     <strong>
-                      {result.analysis.mobility_impairment}/5
+                      {result.analysis?.mobility_impairment ?? 0}/5
                     </strong>
                   </div>
 
                   <div>
                     <span>Bleeding indicator</span>
                     <strong>
-                      {result.analysis.bleeding}/5
+                      {result.analysis?.bleeding ?? 0}/5
                     </strong>
                   </div>
 
                   <div>
                     <span>Environmental danger</span>
                     <strong>
-                      {result.analysis.environmental_danger}/5
+                      {result.analysis?.environmental_danger ?? 0}/5
                     </strong>
                   </div>
 
                   <div>
                     <span>Vulnerability</span>
                     <strong>
-                      {result.analysis.vulnerability}/5
+                      {result.analysis?.vulnerability ?? 0}/5
                     </strong>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* BOTTOM RESULT CARDS */}
             <div className="result-bottom-grid">
               <div className="reasons-card">
                 <h3>Why is this case urgent?</h3>
@@ -552,7 +571,7 @@ function Report() {
                 </p>
 
                 <div className="reason-list">
-                  {result.score.reasons?.map((reason, index) => (
+                  {result.score?.reasons?.map((reason, index) => (
                     <div key={index}>
                       <span>{index + 1}</span>
                       <p>{reason}</p>
@@ -565,7 +584,7 @@ function Report() {
                 <h3>What the AI observed</h3>
 
                 <div className="observation-list">
-                  {result.analysis.observations?.map(
+                  {result.analysis?.observations?.map(
                     (observation, index) => (
                       <div key={index}>
                         <CheckCircle2 size={15} />
@@ -577,6 +596,7 @@ function Report() {
               </div>
             </div>
 
+            {/* DISCLAIMER */}
             <div className="result-disclaimer">
               <Info size={16} />
 
