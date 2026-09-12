@@ -193,8 +193,9 @@ From the backend directory, install the required Python dependencies and start t
 
 The frontend currently expects the API at:
 
-http://localhost:8000
-
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://pawsignal-2.onrender.com";
+  
 If your deployed backend uses another URL, update the frontend API configuration accordingly.
 
 Important Disclaimer
