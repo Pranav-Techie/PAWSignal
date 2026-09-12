@@ -131,12 +131,12 @@ function Report() {
       formData.append("longitude", longitude);
 
       const response = await fetch(
-        "http://localhost:8000/analyze",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+  `${API_URL}/analyze`,
+  {
+    method: "POST",
+    body: formData,
+  }
+);
 
       const data = await response.json();
 
